@@ -6,6 +6,9 @@
   </div>
 </template>
 <script>
+import QS from 'qs';
+import Cookies from "js-cookie";
+import {getQuickEntryData} from '@/api/index'
 export default {
   name: "Index",
   data() {
@@ -43,6 +46,13 @@ export default {
     }
   },
   mounted() {
+    getQuickEntryData({id: 1}).then(res => {
+      if(res.data.code === "200") {
+        this.quickEntryData = res.data.data.slice(0, 5);
+      }
+    })
+    const token = Cookies.get('jwtToken')
+    console.log(token, 'token')
     console.log(this.$md5('密码'))
     console.log(this.$math.add(2,3))
     this.drawChart();
