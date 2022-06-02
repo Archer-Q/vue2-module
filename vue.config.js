@@ -2,7 +2,14 @@ const { defineConfig } = require('@vue/cli-service')
 const path = require('path')
 const resolve = (dir) => path.join(__dirname, dir)
 module.exports = {
+    transpileDependencies: ["*"],
+    publicPath: './',
+    assetsDir: 'static',
+    productionSourceMap: false,
+    outputDir: 'dist',
   chainWebpack: config => {
+      config.entry.app = ['babel-polyfill', './src/main.js', './utils', './node_modules'];
+
     // 原svg规则覆盖了所有的svg图标，需要先将自己的svg排除，以应用新的sprite规则
     // src/assets/icons是我们将要存放svg的目录
     config.module
