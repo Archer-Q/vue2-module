@@ -1,62 +1,145 @@
 <template>
   <div>
-    <svg-icon icon-class="add"></svg-icon>
-    <el-button>111</el-button>
-    <div id="main" style="width: 600px;height:400px;"></div>
+    <pub-list
+      border
+      :actions="activeActions"
+      ref="formRef"
+      :tableFormRef="tableFormRef"
+      :cols="colsData"
+      :current-page="currentPage"
+      :table-data="tableData"
+      @getAction="handleStatusFilter"
+      @handleDetail="handleDetail"
+      @handleEdit="handleEdit"
+      @handleDelete="handleDelete"
+      :checkStatus="checkStatus"
+    />
   </div>
 </template>
 <script>
-import QS from 'qs';
-import Cookies from "js-cookie";
-import {getQuickEntryData} from '@/api/index'
+import PubList from "@/components/pubList";
 export default {
   name: "Index",
+  components: {
+    PubList
+  },
   data() {
     return {
-      vue: 'Vue'
-    }
-  },
-  methods: {
-    drawChart() {
-      // 基于准备好的dom，初始化echarts实例
-      let myChart = this.$echarts.init(document.getElementById("main"));
-      // 指定图表的配置项和数据
-      let option = {
-        title: {
-          text: "ECharts 入门示例"
+      colsData: [
+        {
+          prop: 'name',
+          label:"姓名",
         },
-        tooltip: {},
-        legend: {
-          data: ["销量"]
-        },
-        xAxis: {
-          data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-        },
-        yAxis: {},
-        series: [
-          {
-            name: "销量",
-            type: "bar",
-            data: [5, 20, 36, 10, 10, 20]
+        {
+          prop: 'sex',
+          label:"性别",
+          isSpecialColResult: true,
+          isCodeTableFormatter: (val) => {
+            if (val.sex == 1) {
+              return '男'
+            }else{
+              return '女'
+            }
           }
-        ]
-      };
-      // 使用刚指定的配置项和数据显示图表。
-      myChart.setOption(option);
+        },
+        {
+          prop: 'age',
+          label:"年纪",
+          format: 'YYYY-MM-DD',
+          isSpecialColor: true,
+          isSpecialClass: (val) => {
+            if (val == 1654760753) {
+              return 'color-red'
+            }
+          }
+        },
+        {
+          prop: 'status',
+          label:"状态",
+        }
+      ],
+      tableData: {
+        data: [
+          {name: '小明', sex: '1', age: 1654760753, status: 1},
+          {name: '小花', sex: '2', age: 1654760754, status: 2},
+          {name: '小天', sex: '1', age: 1654760755, status: 3},
+          {name: '小明-1', sex: '1', age: 1654760753, status: 1},
+          {name: '小花-1', sex: '2', age: 1654760754, status: 2},
+          {name: '小天-1', sex: '1', age: 1654760755, status: 3},
+        ],
+        pageSize: 1
+      },
+      activeActions: [],
+      actions: [
+        {
+          id: 'detail',
+          name: '详情',
+          action: 'handleDetail',
+          permission: 110,
+          iconName: 'icon-zidongshengcheng'
+        },
+        {
+          id: 'edit',
+          name: '编辑',
+          action: 'handleEdit',
+          permission: 111,
+          iconName: 'icon-bianji'
+        },
+        {
+          id: 'delete',
+          name: '删除',
+          action: 'handleDelete',
+          permission: 110,
+          iconName: 'icon-shanchu'
+        },
+      ],
+      tableFormRef: "tableFormRef",
+      currentPage: 1,
+      pageSize: 5,
+      permissionData: ['status'],
     }
   },
   mounted() {
-    getQuickEntryData({id: 1}).then(res => {
-      if(res.data.code === "200") {
-        this.quickEntryData = res.data.data.slice(0, 5);
+    this.activeActions = this.actions;
+  },
+  methods: {
+    checkStatus(row) {
+      switch (row.permission) {
+        case 110:
+          return row.status == 1;
+        case 111:
+          row.status == 2;
+        default:
+          break;
       }
-    })
-    const token = Cookies.get('jwtToken')
-    console.log(token, 'token')
-    console.log(this.$md5('密码'))
-    console.log(this.$math.add(2,3))
-    this.drawChart();
-  }
+    },
+    handleStatusFilter(row) {
+      let activeActionsArr = [];
+      switch (row.status) {
+        case 1:
+          activeActionsArr = ['详情', '编辑', '删除'];
+          break;
+        case 2:
+          activeActionsArr = ['详情', '编辑'];
+          break;
+        case 3:
+          activeActionsArr = ['详情', '删除'];
+          break;
+      }
+      this.activeActions = this.actions.filter(
+          (item) => activeActionsArr.indexOf(item.name) > -1
+      )
+    },
+    handleDetail() {
+
+    },
+    handleEdit() {
+
+    },
+    handleDelete() {
+
+    },
+  },
 }
 </script>
 <style lang="scss"></style>
